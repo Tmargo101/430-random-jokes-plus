@@ -45,7 +45,7 @@ const jokeArray = [
     q: 'How do you tell HTML from HTML5?',
     a: "Try it out in Internet Explorer.  Did it work?  No?  It's HTML5!",
   },
-  
+
 ];
 
 const getRandomJoke = () => {
@@ -53,18 +53,17 @@ const getRandomJoke = () => {
   return JSON.stringify(jokeArray[random]);
 };
 
-const getRandomJokes = (limit = 1) => {  
+const getRandomJokes = (limit = 1) => {
   const responseObj = [];
-  
+
   if (limit > 0 && limit < jokeArray.length) {
-    let shuffledJokes = _.shuffle(jokeArray);
-    for (let i = 0; i < limit; i++) {
+    const shuffledJokes = _.shuffle(jokeArray);
+    for (let i = 0; i < limit; i += 1) {
       responseObj[responseObj.length] = shuffledJokes[i];
     }
   }
   return JSON.stringify(responseObj);
 };
-
 
 const getRandomJokeResponse = (request, response) => {
   response.writeHead(200, { 'Content-Type': 'application/json' });
@@ -76,9 +75,9 @@ const getRandomJokesResponse = (request, response, params) => {
   response.writeHead(200, { 'Content-Type': 'application/json' });
   response.write(getRandomJokes(params.limit));
   response.end();
-}
+};
 
 module.exports = {
   getRandomJokeResponse,
   getRandomJokesResponse,
-}
+};

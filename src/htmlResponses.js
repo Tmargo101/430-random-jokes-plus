@@ -18,4 +18,4 @@ const get404Response = (request, response) => {
 
 module.exports = {
   get404Response,
-}
+};
