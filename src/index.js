@@ -2,15 +2,24 @@ const http = require('http');
 const url = require('url');
 const query = require('querystring');
 
-const htmlHandler = require('./htmlResponses.js');
-const jsonHandler = require('./responses.js');
+// const htmlHandler = require('./htmlResponses.js');
+const responses = require('./responses.js');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 const urlStruct = {
-  '/random-joke': jsonHandler.getRandomJokeResponse,
-  '/random-jokes': jsonHandler.getRandomJokesResponse,
-  notFound: htmlHandler.get404Response,
+  GET: {
+    '/random-joke': responses.getRandomJokeResponse,
+    '/random-jokes': responses.getRandomJokesResponse,
+    '/default-styles.css': responses.getCSSResponse,
+    notFound: responses.get404Response,
+  },
+  HEAD: {
+    '/random-joke': responses.getRandomJokeResponse,
+    '/random-jokes': responses.getRandomJokesResponse,
+    notFound: responses.get404Response,
+  },
+
 };
 
 const onRequest = (request, response) => {
@@ -20,10 +29,10 @@ const onRequest = (request, response) => {
   let acceptedTypes = request.headers.accept && request.headers.accept.split(',');
   acceptedTypes = acceptedTypes || [];
 
-  if (urlStruct[pathname]) {
-    urlStruct[pathname](request, response, params, acceptedTypes);
+  if (urlStruct[request.method][pathname]) {
+    urlStruct[request.method][pathname](request, response, params, acceptedTypes, request.method);
   } else {
-    urlStruct.notFound(request, response);
+    urlStruct.GET.notFound(request, response);
   }
 };
 

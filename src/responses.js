@@ -1,4 +1,8 @@
 const _ = require('underscore');
+const fs = require('fs');
+
+const errorPage = fs.readFileSync(`${__dirname}/../client/error.html`);
+const defaultStyles = fs.readFileSync(`${__dirname}/../client/default-styles.css`);
 
 const jokeArray = [
   {
@@ -47,6 +51,10 @@ const jokeArray = [
   },
 
 ];
+
+// Source: https://stackoverflow.com/questions/2219526/how-many-bytes-in-a-javascript-string/29955838
+// Refactored to an arrow function by ACJ
+const getBinarySize = (string) => Buffer.byteLength(string, 'utf8');
 
 const getRandomJoke = (responseType) => {
   const random = Math.floor((Math.random() * jokeArray.length));
@@ -98,30 +106,65 @@ const getRandomJokes = (limit = 1, responseType) => {
   return JSON.stringify(responseObj);
 };
 
-const getRandomJokeResponse = (request, response, params, acceptedTypes) => {
-  if (acceptedTypes.includes('text/xml')) {
-    response.writeHead(200, { 'Content-Type': 'text/xml' });
-    response.write(`${getRandomJoke('text/xml')}`);
+const getRandomJokeResponse = (request, response, params, acceptedTypes, httpMethod) => {
+  if (httpMethod === 'GET') {
+    if (acceptedTypes.includes('text/xml')) {
+      response.writeHead(200, { 'Content-Type': 'text/xml' });
+      response.write(`${getRandomJoke('text/xml')}`);
+    } else {
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      response.write(`${getRandomJoke('application/json')}`);
+    }
+  } else if (acceptedTypes.includes('text/xml')) {
+    response.writeHead(200, { 'Content-Type': 'text/xml', 'Content-Length': `${getBinarySize(getRandomJoke(params.limit, 'text/xml'))}` });
   } else {
-    response.writeHead(200, { 'Content-Type': 'application/json' });
-    response.write(`${getRandomJoke('application/json')}`);
+    response.writeHead(200, { 'Content-Type': 'application/json', 'Content-Length': `${getBinarySize(getRandomJoke(params.limit, 'text/xml'))}` });
   }
+
   response.end();
 };
 
-const getRandomJokesResponse = (request, response, params, acceptedTypes) => {
-  if (acceptedTypes.includes('text/xml')) {
-    response.writeHead(200, { 'Content-Type': 'text/xml' });
-    response.write(getRandomJokes(params.limit, 'text/xml'));
+const getRandomJokesResponse = (request, response, params, acceptedTypes, httpMethod) => {
+  if (httpMethod === 'GET') {
+    if (acceptedTypes.includes('text/xml')) {
+      response.writeHead(200, { 'Content-Type': 'text/xml' });
+      response.write(getRandomJokes(params.limit, 'text/xml'));
+    } else {
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      response.write(getRandomJokes(params.limit, 'application/json'));
+    }
+  } else if (acceptedTypes.includes('text/xml')) {
+    response.writeHead(200, { 'Content-Type': 'text/xml', 'Content-Length': `${getBinarySize(getRandomJokes(params.limit, 'text/xml'))}` });
   } else {
-    response.writeHead(200, { 'Content-Type': 'application/json' });
-    response.write(getRandomJokes(params.limit, 'application/json'));
+    response.writeHead(200, { 'Content-Type': 'application/json', 'Content-Length': `${getBinarySize(getRandomJokes(params.limit, 'application/json'))}` });
   }
 
+  // if (acceptedTypes.includes('text/xml')) {
+  //   response.writeHead(200, { 'Content-Type': 'text/xml' });
+  //   response.write(getRandomJokes(params.limit, 'text/xml'));
+  // } else {
+  //   response.writeHead(200, { 'Content-Type': 'application/json' });
+  //   response.write(getRandomJokes(params.limit, 'application/json'));
+  // }
+  response.end();
+};
+
+// Moved from htmlResponses.js
+const get404Response = (request, response) => {
+  response.writeHead(200, { 'Content-Type': 'text/html' });
+  response.write(errorPage);
+  response.end();
+};
+
+const getCSSResponse = (request, response) => {
+  response.writeHead(200, { 'Content-Type': 'text/css' });
+  response.write(defaultStyles);
   response.end();
 };
 
 module.exports = {
   getRandomJokeResponse,
   getRandomJokesResponse,
+  get404Response,
+  getCSSResponse,
 };
