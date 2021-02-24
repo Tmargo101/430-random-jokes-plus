@@ -9,6 +9,7 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 const urlStruct = {
   GET: {
+    '/joke-client.html': responses.getClientResponse,
     '/random-joke': responses.getRandomJokeResponse,
     '/random-jokes': responses.getRandomJokesResponse,
     '/default-styles.css': responses.getCSSResponse,

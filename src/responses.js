@@ -2,6 +2,7 @@ const _ = require('underscore');
 const fs = require('fs');
 
 const errorPage = fs.readFileSync(`${__dirname}/../client/error.html`);
+const clientPage = fs.readFileSync(`${__dirname}/../client/joke-client.html`);
 const defaultStyles = fs.readFileSync(`${__dirname}/../client/default-styles.css`);
 
 const jokeArray = [
@@ -162,9 +163,16 @@ const getCSSResponse = (request, response) => {
   response.end();
 };
 
+const getClientResponse = (request, response) => {
+  response.writeHead(200, { 'Content-Type': 'text/html' });
+  response.write(clientPage);
+  response.end();
+};
+
 module.exports = {
   getRandomJokeResponse,
   getRandomJokesResponse,
   get404Response,
   getCSSResponse,
+  getClientResponse,
 };
